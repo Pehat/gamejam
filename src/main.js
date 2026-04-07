@@ -1,4 +1,7 @@
-define(['level.js'], function (playLevel) {
+define([
+    'level.js',
+    'chiptune2/chiptune2'
+], function (playLevel) {
     var levels = [
         'res/maps/level0.json',
         'res/maps/level3.json',
@@ -7,36 +10,31 @@ define(['level.js'], function (playLevel) {
 
     var modPlayer;
     var modTimeout;
-    var isMusic = false;
+    var isMusic;
 
     function loopPlayer() {
-        if (modPlayer) {
-            modPlayer.stop();
-        } else {
-            modPlayer = new ChiptuneJsPlayer(new ChiptuneJsConfig(1));
+        if (!modPlayer) {
+            return;
         }
-        modPlayer.load('res/music/theme.xm', function(buffer){
+        modPlayer.load('res/music/theme.xm', function(buffer) {
             modPlayer.play(buffer);
             modPlayer.togglePause(buffer);
-
             modTimeout = setTimeout(loopPlayer, 1000 * modPlayer.duration());
             modPlayer.play(buffer);
         });
     }
 
     window.togglePlayer = function() {
-        if (modPlayer) {
-            if (isMusic) {
-                modPlayer.stop();
-                clearTimeout(modTimeout);
-            } else {
-                loopPlayer();
-            }
-            isMusic = !isMusic;
+        if (!modPlayer) {
+            return;
         }
-    }
-    if (isMusic) {
-        loopPlayer();
+        isMusic = document.querySelector('#music_toggle').checked;
+        if (!isMusic) {
+            modPlayer.stop();
+            clearTimeout(modTimeout);
+        } else {
+            loopPlayer();
+        }
     }
 
     var lvlCounter = document.querySelector('#lvlcounter');
@@ -50,8 +48,20 @@ define(['level.js'], function (playLevel) {
             return;
         }
         lvlCounter.innerHTML = 'Level ' + (levelIdx + 1);
+        
         playLevel(levels[levelIdx]).then(function () { playLevelWrap(levelIdx + 1); });
     }
-
-    playLevelWrap(0);
+    
+    var startButton = document.querySelector('#startgame');
+    function startGame() {
+        startButton.remove();
+        var gameContainer = document.querySelector('#game_container');
+        gameContainer.style = 'visibility: visible';
+        
+        modPlayer = new ChiptuneJsPlayer(new ChiptuneJsConfig(1));
+        isMusic = document.querySelector('#music_toggle').checked;
+        loopPlayer();
+        playLevelWrap(0);
+    }
+    startButton.addEventListener('click', startGame);
 });
