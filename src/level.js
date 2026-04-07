@@ -5,8 +5,7 @@ define([
     'jsiso/img/load',
     'jsiso/tile/Field',
     'util/clamp',
-    'util/pathResolve',
-    'chiptune2/chiptune2'
+    'util/pathResolve'
 ], function (
     CanvasControl,
     InputControl,
