@@ -7,13 +7,14 @@
         window.ChiptuneJsPlayer = ChiptuneJsPlayer;
     </script>
     <script src='howler/howler.min.js'></script>
+    <script src="require.js"></script>
+    <script type="module" src="main.js"></script>
 <head>
 <body>
     <h1>Adventures of Vasily the Pyramid</h1>
     <button id="startgame">PLAY</button>
     <div id="game_container" style="visibility: hidden">
       <h3 id="lvlcounter"></h3>
-      <script data-main="main" src="require.js"></script>
       <div style="float: right">
           Toggle music: <input type="checkbox" id="music_toggle" checked onclick='togglePlayer();' tabIndex="-1">
           Toggle sound: <input type="checkbox" id="sound_toggle" checked onclick='toggleSound();' tabIndex="-1">

@@ -1,6 +1,6 @@
-define([
-    'level.js'
-], function (playLevel) {
+import { playLevel } from './level.js';
+
+function main() {
     var levels = [
         'res/maps/level0.json',
         'res/maps/level3.json',
@@ -48,4 +48,6 @@ define([
         playLevelWrap(0);
     }
     startButton.addEventListener('click', startGame);
-});
+};
+
+main();
