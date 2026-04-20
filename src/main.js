@@ -1,6 +1,5 @@
 define([
-    'level.js',
-    'chiptune2/chiptune2'
+    'level.js'
 ], function (playLevel) {
     var levels = [
         'res/maps/level0.json',
@@ -9,33 +8,18 @@ define([
     ];
 
     var modPlayer;
-    var modTimeout;
-    var isMusic;
-
-    function loopPlayer() {
-        if (!modPlayer) {
-            return;
-        }
-        modPlayer.load('res/music/theme.xm', function(buffer) {
-            modPlayer.play(buffer);
-            modPlayer.togglePause(buffer);
-            modTimeout = setTimeout(loopPlayer, 1000 * modPlayer.duration());
-            modPlayer.play(buffer);
-        });
-    }
 
     window.togglePlayer = function() {
         if (!modPlayer) {
             return;
         }
-        isMusic = document.querySelector('#music_toggle').checked;
+        var isMusic = document.querySelector('#music_toggle').checked;
         if (!isMusic) {
-            modPlayer.stop();
-            clearTimeout(modTimeout);
+            modPlayer.pause();
         } else {
-            loopPlayer();
+            modPlayer.unpause();
         }
-    }
+    };
 
     var lvlCounter = document.querySelector('#lvlcounter');
     function playLevelWrap(levelIdx) {
@@ -57,10 +41,10 @@ define([
         startButton.remove();
         var gameContainer = document.querySelector('#game_container');
         gameContainer.style = 'visibility: visible';
-        
-        modPlayer = new ChiptuneJsPlayer(new ChiptuneJsConfig(1));
-        isMusic = document.querySelector('#music_toggle').checked;
-        loopPlayer();
+        modPlayer = new ChiptuneJsPlayer();
+        modPlayer.onInitialized(() => {
+            modPlayer.load('res/music/theme.xm');
+        });
         playLevelWrap(0);
     }
     startButton.addEventListener('click', startGame);

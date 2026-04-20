@@ -2,7 +2,10 @@
 <html>
 <head>
     <title>Adventures of Vasily the Pyramid</title>
-    <script src='chiptune2/libopenmpt.js'></script>
+    <script type="module">
+        import { ChiptuneJsPlayer } from "https://DrSnuggles.github.io/chiptune/chiptune3.js";
+        window.ChiptuneJsPlayer = ChiptuneJsPlayer;
+    </script>
     <script src='howler/howler.min.js'></script>
 <head>
 <body>
