@@ -1,12 +1,12 @@
 import { bridge } from './bridge.js';
+import { clamp } from './util/clamp.js';
+import { pathResolve } from './util/pathResolve.js';
 const {
     CanvasControl,
     InputControl,
     jsonLoad,
     imgLoad,
-    TileField,
-    clamp,
-    pathResolve
+    TileField
 } = bridge;
 
 export async function playLevel(levelFile) {

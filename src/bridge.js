@@ -5,27 +5,21 @@ export const bridge = await new Promise((resolve) => {
             'jsiso/canvas/Input',
             'jsiso/json/load',
             'jsiso/img/load',
-            'jsiso/tile/Field',
-            'util/clamp',
-            'util/pathResolve'
+            'jsiso/tile/Field'
         ],
         (
             CanvasControl,
             InputControl,
             jsonLoad,
             imgLoad,
-            TileField,
-            clamp,
-            pathResolve
+            TileField
         ) => {
             resolve({
                 CanvasControl: CanvasControl,
                 InputControl: InputControl,
                 jsonLoad: jsonLoad,
                 imgLoad: imgLoad,
-                TileField: TileField,
-                clamp: clamp,
-                pathResolve: pathResolve
+                TileField: TileField
             });
         });
 });
