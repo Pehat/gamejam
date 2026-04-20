@@ -1,4 +1,5 @@
 import { playLevel } from './level.js';
+import { ChiptuneJsPlayer } from 'https://DrSnuggles.github.io/chiptune/chiptune3.js';
 
 function main() {
     var levels = [
