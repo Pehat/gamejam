@@ -2,7 +2,15 @@
 <html>
 <head>
     <title>Adventures of Vasily the Pyramid</title>
-
+    <script>
+    window.onerror = function(msg, url, line) {
+        alert("Error: " + msg + "\nurl: " + url + "\nline: " + line);
+        return false;
+    };
+    window.addEventListener('unhandledrejection', function(event) {
+        alert("Promise has failed: " + event.reason);
+    });
+    </script>
     <script src="require.js"></script>
     <script type="module" src="main.js"></script>
 <head>
