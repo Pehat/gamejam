@@ -4,6 +4,7 @@ export class AudioSprites {
         this.sprites = sprites;
         this.context = new window.AudioContext();
         this.buffer = null;
+        this.is_muted = false;
     }
 
     async load() {
@@ -12,8 +13,11 @@ export class AudioSprites {
         this.buffer = await this.context.decodeAudioData(arrayBuffer);
     }
 
+    mute() { this.is_muted = true; }
+    unmute() { this.is_muted = false; }
+
     play(name) {
-        if (!this.buffer || !this.sprites[name]) return;
+        if (this.is_muted || !this.buffer || !this.sprites[name]) return;
 
         const [start, duration] = this.sprites[name];
         const source = this.context.createBufferSource();

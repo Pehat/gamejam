@@ -1,6 +1,5 @@
 import { bridge } from './bridge.js';
 import { clamp } from './util/clamp.js';
-import { AudioSprites } from  './audio_sprites.js';
 import { pathResolve } from './util/pathResolve.js';
 const {
     CanvasControl,
@@ -10,57 +9,27 @@ const {
     TileField
 } = bridge;
 
-export async function playLevel(levelFile) {
+export async function playLevel(levelFile, audio_sprites) {
     return new Promise(function (resolve) {
         var gamepadInterval;
-
-        var isSound = true;
-        var audio_sprites;
         var hasFinished = false;
-
-        async function loadSoundSprites() {
-            if (audio_sprites) {
-                return;
-            }
-            audio_sprites = new AudioSprites(
-                  'res/sound/sprites.wav',
-                  {
-                    xray: [0, 630],
-                    wall: [642, 45],
-                    step: [694, 47],
-                    done: [741, 665],
-                    button: [1405, 475]
-                  });
-            await audio_sprites.load();
-        }
-
-        function playSoundSprite(spriteName) {
-            if (isSound && audio_sprites) {
-                console.log('playing sprite ' + spriteName);
-                audio_sprites.play(spriteName);
-            }
-        }
-
-        window.toggleSound = function() {
-            isSound = !isSound;
-        }
 
         function playExit() {
             console.log('exit');
             hasFinished = true;
-            playSoundSprite('done');
+            audio_sprites.play('done');
         }
 
         function playWall() {
-            playSoundSprite('wall');
+            audio_sprites.play('wall');
         }
 
         function playStep() {
-            playSoundSprite('step');
+            audio_sprites.play('step');
         }
 
         function playButton() {
-            playSoundSprite('button');
+            audio_sprites.play('button');
         }
 
         function getTileProperties(tilesets, tileGid) {
@@ -262,7 +231,7 @@ export async function playLevel(levelFile) {
                                         if (tileIsNotWall(curLevel + variation, level, nextX, nextY)) {
                                             if (tileIsNotNoXRay(curLevel + variation, level, nextX, nextY)) {
                                                 player.level = curLevel + variation;
-                                                playSoundSprite('xray');
+                                                audio_sprites.play('xray');
                                                 xraySuccess = true;
                                             }
                                             break;
@@ -376,7 +345,7 @@ export async function playLevel(levelFile) {
                                             if (tileIsNotWall(curLevel + variation, level, nextX, nextY)) {
                                                 if (tileIsNotNoXRay(curLevel + variation, level, nextX, nextY)) {
                                                     player.level = curLevel + variation;
-                                                    playSoundSprite('xray');
+                                                    audio_sprites.play('xray');
                                                     xraySuccess = true;
                                                 }
                                                 break;
@@ -511,7 +480,6 @@ export async function playLevel(levelFile) {
                 }
 
                 render();
-                loadSoundSprites();
             });
         });
     });
