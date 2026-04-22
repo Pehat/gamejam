@@ -1,6 +1,6 @@
 {
   "short_name": "Vasily",
   "name": "Adventures of Vasily the Pyramid",
-  "start_url": "/src/index.html",
+  "start_url": "/gamejam/src/index.html",
   "display": "standalone"
 }
