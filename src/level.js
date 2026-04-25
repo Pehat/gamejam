@@ -338,7 +338,7 @@ export async function playLevel(levelFile, audio_sprites) {
                                     if (gamepad.buttons[0].pressed) {
                                         variation = -1;
                                     }
-                                    curLevel = player.level;
+                                    var curLevel = player.level;
                                     var xraySuccess = false;
                                     while (layers[curLevel + variation]) {
                                         if (level.layers[curLevel].visible && layers[curLevel + variation].getTile(nextX, nextY) >= 0) {
