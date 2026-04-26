@@ -78,11 +78,12 @@ function main() {
             await playLevelWrap(levelIdx);
         }
 
+        var game_container = document.querySelector("#game_container");
         lvlCounter.innerHTML = 'You\'ve beaten the architecture!';
         lvlCounter.style.color = 'red';
         var winImg = new Image();
         winImg.src = 'res/win.png';
-        document.body.appendChild(winImg);
+        game_container.appendChild(winImg);
     }
     startButton.addEventListener('click', startGame);
 };
