@@ -32,19 +32,6 @@ export async function playLevel(levelFile, audio_sprites) {
             audio_sprites.play('button');
         }
 
-        function getTileProperties(tilesets, tileGid) {
-            var i = 0;
-
-            while (
-                i < tilesets.length &&
-                tilesets[i].firstgid < tileGid
-            ) {
-                i += 1;
-            }
-
-            return tilesets.tileproperties[tileGid - tilesets[i - 1].firstgid];
-        }
-
         function getTilesByType(level, type) {
             var tileProps = level.tilesets[0].tileproperties;
             return Object.keys(tileProps).filter(function (tileId) {
