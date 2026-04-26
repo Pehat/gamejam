@@ -1,9 +1,8 @@
 import { bridge } from './bridge.js';
 import { clamp } from './util/clamp.js';
 import { pathResolve } from './util/pathResolve.js';
-import { registerKeyboardHandler, registerGamepadHandler, registerActionsHandler, getCurrentInputState } from './input.js';
+import { registerKeyboardHandler, unregisterKeyboardHandler, registerGamepadHandler, registerActionsHandler, getCurrentInputState } from './input.js';
 const {
-    CanvasControl,
     jsonLoad,
     imgLoad,
     TileField
@@ -67,7 +66,7 @@ export async function playLevel(levelFile, audio_sprites) {
         }
 
         function render(context, level, layers, player) {
-            context.clearRect(0, 0, 900, 600);
+            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
             var playerLayer = layers[player.level];
             layers.forEach(function (layer, i) {
@@ -119,15 +118,15 @@ export async function playLevel(levelFile, audio_sprites) {
         }
 
         async function setupGame(level, imgRes) {
-            var context = CanvasControl.create('canvas', 900, 600,
-                {"position": "absolute",
-                "top": "0",
-                "left": "0",
-                "z-index": "0"},
-                "game_container");
-
+            var canvas = document.querySelector('#canvas');
+            canvas.tabIndex = 0;
+            canvas.focus();
+            var context = canvas.getContext('2d');
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
             var layers = level.layers.map(function (layer) {
-                var l = new TileField(context, 900, 600);
+                var l = new TileField(context, null, null);
                 l.setup({
                     layout: layer.data.map(function (i) { return i - 1; }),
                     graphics: imgRes[0].files,
@@ -153,8 +152,8 @@ export async function playLevel(levelFile, audio_sprites) {
                 l.flip("horizontal");
                 l.rotate("left");
 
-                l.align("h-center", CanvasControl().width, layer.width, 0);
-                l.align("v-center", CanvasControl().height, layer.height, 0);
+                l.align("h-center", canvas.width, layer.width, 0);
+                l.align("v-center", canvas.height, layer.height, 0);
 
                 return l;
             });
@@ -168,9 +167,6 @@ export async function playLevel(levelFile, audio_sprites) {
 
             setPlayerEntryCoords(player, level);
 
-            var canvas = document.querySelector('#canvas');
-            canvas.tabIndex = 0;
-            canvas.focus();
             registerKeyboardHandler(canvas);
             registerGamepadHandler(canvas);
             registerActionsHandler((action) => {
@@ -268,12 +264,12 @@ export async function playLevel(levelFile, audio_sprites) {
                     layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'exit')[0]
                 ) {
                     playExit();
-                    context.canvas.parentElement.removeChild(context.canvas);
                     //hasFinished = true;
                     if (gamepadInterval) {
                         clearInterval(gamepadInterval);
                     }
-                    document.onkeydown = document.onkeyup = null;
+                    // TODO: unbind all the input handlers
+                    unregisterKeyboardHandler(canvas);
                     resolve();
                 }
 

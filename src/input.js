@@ -28,11 +28,17 @@ var input_state = {
 
 var actions_handler = null;
 
+function keyDownListener(e) {
+    const action = INPUT_MAP.keyboard[e.code];
+    if (action && actions_handler) actions_handler(action);
+}
+
 export function registerKeyboardHandler(canvas) {
-    canvas.addEventListener('keydown', (e) => {
-        const action = INPUT_MAP.keyboard[e.code];
-        if (action && actions_handler) actions_handler(action);
-    });
+    canvas.addEventListener('keydown', keyDownListener);
+}
+
+export function unregisterKeyboardHandler(canvas) {
+    canvas.removeEventListener('keydown', keyDownListener);
 }
 
 export function registerGamepadHandler(canvas) {
@@ -41,3 +47,4 @@ export function registerGamepadHandler(canvas) {
 
 export function registerActionsHandler(handler) { actions_handler = handler; }
 export function getCurrentInputState() { return input_state; }
+

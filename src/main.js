@@ -83,6 +83,8 @@ function main() {
         }
 
         var game_container = document.querySelector("#game_container");
+        var canvas = document.querySelector("#canvas");
+        canvas.classList.toggle('invisible');
         lvlCounter.innerHTML = 'You\'ve beaten the architecture!';
         lvlCounter.style.color = 'red';
         var winImg = new Image();

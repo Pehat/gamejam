@@ -8,6 +8,15 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 0;
+}
+
 canvas:focus {
   outline: none;
 }
