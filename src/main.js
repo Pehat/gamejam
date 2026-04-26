@@ -51,7 +51,12 @@ function main() {
             modPlayer.unpause();
         }
     };
-
+    
+    window.toggleMenu = function() {
+        var menu_toggle = document.querySelector("#menu");
+        menu.classList.toggle('invisible');
+    }
+    
     var lvlCounter = document.querySelector('#lvlcounter');
 
     async function playLevelWrap(levelIdx) {
@@ -61,9 +66,8 @@ function main() {
     
     var startButton = document.querySelector('#startgame');
     async function startGame() {
-        startButton.remove();
-        var gameContainer = document.querySelector('#game_container');
-        gameContainer.style = 'visibility: visible';
+        var splash = document.querySelector('#splash');
+        splash.remove();
 
         modPlayer = new ChiptuneJsPlayer();
         modPlayer.onInitialized(() => {

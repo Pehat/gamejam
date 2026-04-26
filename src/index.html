@@ -13,23 +13,27 @@
     <script type="module" src="main.js"></script>
 <head>
 <body>
-    <h1>Adventures of Vasily the Pyramid</h1>
-    <button id="startgame">PLAY</button>
-    <div id="game_container" style="visibility: hidden">
-      <h3 id="lvlcounter"></h3>
-      <div style="float: right">
-          Toggle music: <input type="checkbox" id="music_toggle" checked onclick='togglePlayer();' tabIndex="-1">
-          Toggle sound: <input type="checkbox" id="sound_toggle" checked onclick='toggleSound();' tabIndex="-1">
-          <div id='help' style="margin-top: 20px">
-              In Soviet Russia, architecture builds YOU<i>!!</i><br/>
-              Your aim is to deliver Vasily the Pyramid to his house.<br/>
-              Vasily posseses the magic ability to teleport between platforms.<br/>
-              Some platforms are unable to teleport (one ore both directions).<br/>
-              A button can save the day.<br/>
-              Use arrows to move, Z and X to teleport.<br/>
-              The game supports XBox-compatible joystick.
-          </div>
-      </div>
-     </div>
+  <div id="splash">
+      <h1 class="unselectable">Adventures of Vasily the Pyramid</h1>
+      <button id="startgame">PLAY</button>
+  </div>
+  <div id="game_container">
+    <h3 id="lvlcounter" class="unselectable"></h3>
+    <button id="menu_toggle" onclick="toggleMenu()">?</button>
+    <div id="menu" class="invisible">
+        <input type="checkbox" id="music_toggle" checked onclick='togglePlayer();' tabIndex="-1">MUSIC
+        <input type="checkbox" id="sound_toggle" checked onclick='toggleSound();' tabIndex="-1">
+        SOUND
+        <div id='help' style="margin-top: 20px">
+            In Soviet Russia, architecture builds YOU<i>!!</i><br/>
+            Your aim is to deliver Vasily the Pyramid to his house.<br/>
+            Vasily posseses the magic ability to teleport between platforms.<br/>
+            Some platforms are unable to teleport (one ore both directions).<br/>
+            A button can save the day.<br/>
+            Use arrows to move, Z and X to teleport.<br/>
+            The game supports XBox-compatible joystick.
+        </div>
+    </div>
+  </div>
 </body>
 </html>

@@ -96,7 +96,12 @@ export async function playLevel(levelFile, audio_sprites) {
                 graphics: ['res/player-top.png', 'res/player-base.png', 'res/player-left.png', 'res/player-right.png']
             })).then(function (imgRes) {
                 console.log(imgRes);
-                var context = CanvasControl.create('canvas', 900, 600);
+                var context = CanvasControl.create('canvas', 900, 600,
+                    {"position": "absolute",
+                    "top": "0",
+                    "left": "0",
+                    "z-index": "0"},
+                    "game_container");
                 var layers = level.layers.map(function (layer) {
                     var l = new TileField(context, 900, 600);
                     l.setup({
