@@ -66,160 +66,260 @@ export async function playLevel(levelFile, audio_sprites) {
             player.y = (entranceTileIdx / level.width) | 0;
         }
 
-        jsonLoad([levelFile]).then(function (res) {
-            var level = res[0];
+        function render(context, level, layers, player) {
+            context.clearRect(0, 0, 900, 600);
 
-            console.log(level);
-
-            imgLoad(level.tilesets.map(function (tileset) {
-                return {
-                    graphics: [pathResolve(tileset.image, levelFile)],
-                    spritesheet: {
-                        width: level.tilewidth,
-                        height: level.tileheight
-                    }
-                };
-            }).concat({
-                graphics: ['res/player-top.png', 'res/player-base.png', 'res/player-left.png', 'res/player-right.png']
-            })).then(function (imgRes) {
-                console.log(imgRes);
-                var context = CanvasControl.create('canvas', 900, 600,
-                    {"position": "absolute",
-                    "top": "0",
-                    "left": "0",
-                    "z-index": "0"},
-                    "game_container");
-                var layers = level.layers.map(function (layer) {
-                    var l = new TileField(context, 900, 600);
-                    l.setup({
-                        layout: layer.data.map(function (i) { return i - 1; }),
-                        graphics: imgRes[0].files,
-                        graphicsDictionary: imgRes[0].dictionary,
-                        tileWidth: level.tilewidth,
-                        tileHeight: level.tileheight,
-                        width: layer.width,
-                        height: layer.height,
-                        type: layer.type,
-                        //lightmap: [],
-                        //shadowDistance: {
-                        //    color: '0, 0, 33',
-                        //    distance: 1,
-                        //    darkness: 0.95
-                        //},
-                        //shadow: {
-                        //    offset: 0, // Offset is the same height as the stack tile
-                        //    verticalColor: '(5, 5, 30, 0.4)',
-                        //    horizontalColor: '(6, 5, 50, 0.5)'
-                        //}
-                    });
-
-                    l.flip("horizontal");
-                    l.rotate("left");
-
-                    l.align("h-center", CanvasControl().width, layer.width, 0);
-                    l.align("v-center", CanvasControl().height, layer.height, 0);
-
-                    return l;
-                });
-
-                var player = {
-                    x: 1,
-                    y: 1,
-                    imgs: [imgRes[1].files['player-base.png'], imgRes[1].files['player-top.png'], imgRes[1].files['player-left.png'], imgRes[1].files['player-right.png']],
-                    level: 0
-                };
-
-                setPlayerEntryCoords(player, level);
-
-                function render() {
-                    context.clearRect(0, 0, 900, 600);
-
-                    var playerLayer = layers[player.level];
-                    layers.forEach(function (layer, i) {
-                        if (i === player.level + 1) {
-                            var pc = layers[0].getTilePos(player.x, player.y);
-                            context.drawImage(player.imgs[0], pc.x, pc.y);
-                            context.drawImage(player.imgs[1], pc.x, pc.y - 16);
-                            context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
-                            context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
-                        }
-                        if (!level.layers[i].visible) {
-                            return;
-                        }
-                        for (var x = 0; x < level.width; ++x) {
-                            for (var y = 0; y < level.height; ++y) {
-                                if ((i > player.level) && playerLayer.getTile(x, y) >= 0) {// && layer.getTile(player.x, player.y) >= 0) {
-                                    if (x === player.x && y === player.y) {
-                                        context.globalAlpha = 0.3;
-                                    } else if (Math.abs(x - player.x) + Math.abs(y - player.y) === 1) {
-                                        context.globalAlpha = 0.5;
-                                    } else if (Math.abs(x - player.x) === 1 && Math.abs(y - player.y) === 1) {
-                                        context.globalAlpha = 0.7;
-                                    }
-                                }
-                                //if ((x === player.x) && (y === player.y))
-                                //    layer.setLight(x, y);
-                                layer.draw(x, y);
-                                context.globalAlpha = 1;
+            var playerLayer = layers[player.level];
+            layers.forEach(function (layer, i) {
+                if (i === player.level + 1) {
+                    var pc = layers[0].getTilePos(player.x, player.y);
+                    context.drawImage(player.imgs[0], pc.x, pc.y);
+                    context.drawImage(player.imgs[1], pc.x, pc.y - 16);
+                    context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
+                    context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
+                }
+                if (!level.layers[i].visible) {
+                    return;
+                }
+                for (var x = 0; x < level.width; ++x) {
+                    for (var y = 0; y < level.height; ++y) {
+                        if ((i > player.level) && playerLayer.getTile(x, y) >= 0) {// && layer.getTile(player.x, player.y) >= 0) {
+                            if (x === player.x && y === player.y) {
+                                context.globalAlpha = 0.3;
+                            } else if (Math.abs(x - player.x) + Math.abs(y - player.y) === 1) {
+                                context.globalAlpha = 0.5;
+                            } else if (Math.abs(x - player.x) === 1 && Math.abs(y - player.y) === 1) {
+                                context.globalAlpha = 0.7;
                             }
                         }
-
-                        if (i <= player.level) {
-                            pc = layers[0].getTilePos(player.x, player.y);
-                            context.drawImage(player.imgs[0], pc.x, pc.y);
-                            context.drawImage(player.imgs[1], pc.x, pc.y - 16);
-                            context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
-                            context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
-                        }
-                    });
-
-                    //pc = layers[0].getTilePos(player.x, player.y);
-                    //context.drawImage(player.imgs[1], pc.x, pc.y - 16);
-                    //context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
-                    //context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
-
-                    !hasFinished && requestAnimationFrame(render);
+                        //if ((x === player.x) && (y === player.y))
+                        //    layer.setLight(x, y);
+                        layer.draw(x, y);
+                        context.globalAlpha = 1;
+                    }
                 }
 
-                var input = new InputControl(document, context.canvas);
+                if (i <= player.level) {
+                    pc = layers[0].getTilePos(player.x, player.y);
+                    context.drawImage(player.imgs[0], pc.x, pc.y);
+                    context.drawImage(player.imgs[1], pc.x, pc.y - 16);
+                    context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
+                    context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
+                }
+            });
 
-                input.keyboard(function (key, pressed, e) {
-                    var variation = null;
-                    var curLevel = null;
-                    var lastNonWallLevel = null;
-                    var lastTileWasNotWall = null;
-                    if (hasFinished)
-                        return;
-                    if (pressed) {
-                        var nextX = player.x, nextY = player.y;
+            //pc = layers[0].getTilePos(player.x, player.y);
+            //context.drawImage(player.imgs[1], pc.x, pc.y - 16);
+            //context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
+            //context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
 
-                        if ([38, 40, 37, 39, 90, 88].indexOf(key) >= 0) {
-                            e.preventDefault();
+            if (!hasFinished) {
+                requestAnimationFrame((ts) => { render(context, level, layers, player); });
+            }
+        }
+
+        async function setupGame(level, imgRes) {
+            var context = CanvasControl.create('canvas', 900, 600,
+                {"position": "absolute",
+                "top": "0",
+                "left": "0",
+                "z-index": "0"},
+                "game_container");
+            var layers = level.layers.map(function (layer) {
+                var l = new TileField(context, 900, 600);
+                l.setup({
+                    layout: layer.data.map(function (i) { return i - 1; }),
+                    graphics: imgRes[0].files,
+                    graphicsDictionary: imgRes[0].dictionary,
+                    tileWidth: level.tilewidth,
+                    tileHeight: level.tileheight,
+                    width: layer.width,
+                    height: layer.height,
+                    type: layer.type,
+                    //lightmap: [],
+                    //shadowDistance: {
+                    //    color: '0, 0, 33',
+                    //    distance: 1,
+                    //    darkness: 0.95
+                    //},
+                    //shadow: {
+                    //    offset: 0, // Offset is the same height as the stack tile
+                    //    verticalColor: '(5, 5, 30, 0.4)',
+                    //    horizontalColor: '(6, 5, 50, 0.5)'
+                    //}
+                });
+
+                l.flip("horizontal");
+                l.rotate("left");
+
+                l.align("h-center", CanvasControl().width, layer.width, 0);
+                l.align("v-center", CanvasControl().height, layer.height, 0);
+
+                return l;
+            });
+
+            var player = {
+                x: 1,
+                y: 1,
+                imgs: [imgRes[1].files['player-base.png'], imgRes[1].files['player-top.png'], imgRes[1].files['player-left.png'], imgRes[1].files['player-right.png']],
+                level: 0
+            };
+
+            setPlayerEntryCoords(player, level);
+
+            var input = new InputControl(document, context.canvas);
+
+            input.keyboard(function (key, pressed, e) {
+                var variation = null;
+                var curLevel = null;
+                var lastNonWallLevel = null;
+                var lastTileWasNotWall = null;
+                if (hasFinished)
+                    return;
+                if (pressed) {
+                    var nextX = player.x, nextY = player.y;
+
+                    if ([38, 40, 37, 39, 90, 88].indexOf(key) >= 0) {
+                        e.preventDefault();
+                    }
+
+                    switch (key) {
+                        case 38: // arrow up
+                            nextY = clamp(player.y - 1, 0, level.height - 1);
+                            break;
+                        case 40: // arrow down
+                            nextY = clamp(player.y + 1, 0, level.height - 1);
+                            break;
+                        case 37: // arrow left
+                            nextX = clamp(player.x - 1, 0, level.width - 1);
+                            break;
+                        case 39: // arrow right
+                            nextX = clamp(player.x + 1, 0, level.width - 1);
+                            break;
+                        case 90: // z button
+                        case 88: // x button
+                            variation = 1;
+                            if (key === 88) {
+                                variation = -1;
+                            }
+                            curLevel = player.level;
+                            var xraySuccess = false;
+                            while (layers[curLevel + variation]) {
+                                if (level.layers[curLevel + variation].visible && layers[curLevel + variation].getTile(nextX, nextY) >= 0) {
+                                    if (tileIsNotWall(curLevel + variation, level, nextX, nextY)) {
+                                        if (tileIsNotNoXRay(curLevel + variation, level, nextX, nextY)) {
+                                            player.level = curLevel + variation;
+                                            audio_sprites.play('xray');
+                                            xraySuccess = true;
+                                        }
+                                        break;
+                                    }
+                                }
+                                curLevel += variation;
+                            }
+                            if (!xraySuccess) {
+                                playWall();
+                            }
+                            break;
+                    }
+
+                    var shouldMove = false;
+                    var nextLevel = player.level;
+                    if ((layers[player.level].getTile(nextX, nextY) >= 0) && tileIsNotWall(player.level, level, nextX, nextY)) {
+                        shouldMove = true;
+                    } else if ((player.x != nextX) || (player.y != nextY)) {
+                        curLevel = 0;
+                        if (layers[player.level].getTile(nextX, nextY) >= 0)
+                            curLevel = player.level;
+                        lastNonWallLevel = curLevel;
+                        lastTileWasNotWall = false;
+                        while (layers[curLevel + 1]) {
+                            if (level.layers[curLevel + 1].visible && layers[curLevel + 1].getTile(nextX, nextY) >= 0) {
+                                lastTileWasNotWall = tileIsNotWall(curLevel + 1, level, nextX, nextY) && sameType(player.level, player.x, player.y, curLevel + 1, nextX, nextY, layers);
+                                if (lastTileWasNotWall) {
+                                    lastNonWallLevel = curLevel + 1;
+                                }
+                            }
+                            if (lastTileWasNotWall) {
+                                shouldMove = true;
+                                nextLevel = lastNonWallLevel;
+                            }
+                            curLevel += 1;
+                        }
+                    }
+                    if (shouldMove) {
+                        if ((player.x != nextX) || (player.y != nextY) || (player.level != nextLevel)) {
+                            playStep();
                         }
 
-                        switch (key) {
-                            case 38: // arrow up
-                                nextY = clamp(player.y - 1, 0, level.height - 1);
+                        player.x = nextX;
+                        player.y = nextY;
+                        player.level = nextLevel;
+                    } else {
+                        playWall();
+                    }
+
+                    if (
+                        layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'exit')[0]
+                    ) {
+                        playExit();
+                        context.canvas.parentElement.removeChild(context.canvas);
+                        //hasFinished = true;
+                        if (gamepadInterval) {
+                            clearInterval(gamepadInterval);
+                        }
+                        document.onkeydown = document.onkeyup = null;
+                        resolve();
+                    }
+
+                    if (
+                        layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'button1')[0]
+                    ) {
+                        switch (levelFile) {
+                            case 'res/maps/level2.json':
+                                level.layers[3].visible = true;
+                                console.log('push da button1');
+                                playButton();
                                 break;
-                            case 40: // arrow down
-                                nextY = clamp(player.y + 1, 0, level.height - 1);
+                        }
+                    }
+                    if (
+                        layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'button2')[0]
+                    ) {
+                        switch (levelFile) {
+                            case 'res/maps/level2.json':
+                                level.layers[4].visible = true;
+                                console.log('push da button2');
+                                playButton();
                                 break;
-                            case 37: // arrow left
-                                nextX = clamp(player.x - 1, 0, level.width - 1);
-                                break;
-                            case 39: // arrow right
-                                nextX = clamp(player.x + 1, 0, level.width - 1);
-                                break;
-                            case 90: // z button
-                            case 88: // x button
+                        }
+                    }
+                }
+            });
+
+            if (navigator.getGamepads) {
+                var gamepad = navigator.getGamepads()[0];
+                var variation = null;
+
+                function initGamepad(gamepad) {
+                    console.log(gamepad);
+
+                    var f = false;
+                    gamepadInterval =  setInterval(function () {
+                        var nextX = player.x, nextY = player.y;
+                        if (f) return;
+                        var gamepad = navigator.getGamepads()[0];
+                        switch ((true)) {
+                            case !!gamepad.buttons[0].pressed:
+                            case !!gamepad.buttons[1].pressed:
                                 variation = 1;
-                                if (key === 88) {
+                                if (gamepad.buttons[0].pressed) {
                                     variation = -1;
                                 }
-                                curLevel = player.level;
+                                var curLevel = player.level;
                                 var xraySuccess = false;
                                 while (layers[curLevel + variation]) {
-                                    if (level.layers[curLevel + variation].visible && layers[curLevel + variation].getTile(nextX, nextY) >= 0) {
+                                    if (level.layers[curLevel].visible && layers[curLevel + variation].getTile(nextX, nextY) >= 0) {
                                         if (tileIsNotWall(curLevel + variation, level, nextX, nextY)) {
                                             if (tileIsNotNoXRay(curLevel + variation, level, nextX, nextY)) {
                                                 player.level = curLevel + variation;
@@ -235,10 +335,55 @@ export async function playLevel(levelFile, audio_sprites) {
                                     playWall();
                                 }
                                 break;
+                            case !!gamepad.buttons[2].pressed:
+                                console.log(3);
+                                break;
+                            case !!gamepad.buttons[3].pressed:
+                                console.log(3);
+                                break;
+                            case !!gamepad.buttons[4].pressed:
+                                console.log(4);
+                                break;
+                            case !!gamepad.buttons[5].pressed:
+                                console.log(5);
+                                break;
+                            case !!gamepad.buttons[6].pressed:
+                                console.log(6);
+                                break;
+                            case !!gamepad.buttons[7].pressed:
+                                console.log(7);
+                                break;
+                            case !!gamepad.buttons[8].pressed:
+                                console.log(8);
+                                break;
+                            case !!gamepad.buttons[9].pressed:
+                                console.log(9);
+                                break;
+                            case !!gamepad.buttons[10].pressed:
+                                console.log(10);
+                                break;
+                            case !!gamepad.buttons[11].pressed:
+                                console.log(11);
+                                nextY = clamp(player.y - 1, 0, level.height - 1);
+                                break;
+                            case !!gamepad.buttons[12].pressed:
+                                console.log(12);
+                                nextY = clamp(player.y + 1, 0, level.height - 1);
+                                break;
+                            case !!gamepad.buttons[13].pressed:
+                                console.log(13);
+                                nextX = clamp(player.x - 1, 0, level.width - 1);
+                                break;
+                            case !!gamepad.buttons[14].pressed:
+                                console.log(14);
+                                nextX = clamp(player.x + 1, 0, level.width - 1);
+                                break;
+                            default:
+                                f = false;
                         }
 
-                        var shouldMove = false;
-                        var nextLevel = player.level;
+                        shouldMove = false;
+                        nextLevel = player.level;
                         if ((layers[player.level].getTile(nextX, nextY) >= 0) && tileIsNotWall(player.level, level, nextX, nextY)) {
                             shouldMove = true;
                         } else if ((player.x != nextX) || (player.y != nextY)) {
@@ -248,7 +393,7 @@ export async function playLevel(levelFile, audio_sprites) {
                             lastNonWallLevel = curLevel;
                             lastTileWasNotWall = false;
                             while (layers[curLevel + 1]) {
-                                if (level.layers[curLevel + 1].visible && layers[curLevel + 1].getTile(nextX, nextY) >= 0) {
+                                if (layers[curLevel + 1].getTile(nextX, nextY) >= 0) {
                                     lastTileWasNotWall = tileIsNotWall(curLevel + 1, level, nextX, nextY) && sameType(player.level, player.x, player.y, curLevel + 1, nextX, nextY, layers);
                                     if (lastTileWasNotWall) {
                                         lastNonWallLevel = curLevel + 1;
@@ -265,7 +410,6 @@ export async function playLevel(levelFile, audio_sprites) {
                             if ((player.x != nextX) || (player.y != nextY) || (player.level != nextLevel)) {
                                 playStep();
                             }
-
                             player.x = nextX;
                             player.y = nextY;
                             player.level = nextLevel;
@@ -287,192 +431,48 @@ export async function playLevel(levelFile, audio_sprites) {
                         }
 
                         if (
-                            layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'button1')[0]
-                        ) {
-                            switch (levelFile) {
-                                case 'res/maps/level2.json':
-                                    level.layers[3].visible = true;
-                                    console.log('push da button1');
-                                    playButton();
-                                    break;
-                            }
-                        }
-                        if (
-                            layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'button2')[0]
+                            layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'button')[0]
                         ) {
                             switch (levelFile) {
                                 case 'res/maps/level2.json':
                                     level.layers[4].visible = true;
-                                    console.log('push da button2');
+                                    console.log('push da button');
                                     playButton();
                                     break;
                             }
                         }
-                    }
-                });
-
-                if (navigator.getGamepads) {
-                    var gamepad = navigator.getGamepads()[0];
-                    var variation = null;
-
-                    function initGamepad(gamepad) {
-                        console.log(gamepad);
-
-                        var f = false;
-                        gamepadInterval =  setInterval(function () {
-                            var nextX = player.x, nextY = player.y;
-                            if (f) return;
-                            var gamepad = navigator.getGamepads()[0];
-                            switch ((true)) {
-                                case !!gamepad.buttons[0].pressed:
-                                case !!gamepad.buttons[1].pressed:
-                                    variation = 1;
-                                    if (gamepad.buttons[0].pressed) {
-                                        variation = -1;
-                                    }
-                                    var curLevel = player.level;
-                                    var xraySuccess = false;
-                                    while (layers[curLevel + variation]) {
-                                        if (level.layers[curLevel].visible && layers[curLevel + variation].getTile(nextX, nextY) >= 0) {
-                                            if (tileIsNotWall(curLevel + variation, level, nextX, nextY)) {
-                                                if (tileIsNotNoXRay(curLevel + variation, level, nextX, nextY)) {
-                                                    player.level = curLevel + variation;
-                                                    audio_sprites.play('xray');
-                                                    xraySuccess = true;
-                                                }
-                                                break;
-                                            }
-                                        }
-                                        curLevel += variation;
-                                    }
-                                    if (!xraySuccess) {
-                                        playWall();
-                                    }
-                                    break;
-                                case !!gamepad.buttons[2].pressed:
-                                    console.log(3);
-                                    break;
-                                case !!gamepad.buttons[3].pressed:
-                                    console.log(3);
-                                    break;
-                                case !!gamepad.buttons[4].pressed:
-                                    console.log(4);
-                                    break;
-                                case !!gamepad.buttons[5].pressed:
-                                    console.log(5);
-                                    break;
-                                case !!gamepad.buttons[6].pressed:
-                                    console.log(6);
-                                    break;
-                                case !!gamepad.buttons[7].pressed:
-                                    console.log(7);
-                                    break;
-                                case !!gamepad.buttons[8].pressed:
-                                    console.log(8);
-                                    break;
-                                case !!gamepad.buttons[9].pressed:
-                                    console.log(9);
-                                    break;
-                                case !!gamepad.buttons[10].pressed:
-                                    console.log(10);
-                                    break;
-                                case !!gamepad.buttons[11].pressed:
-                                    console.log(11);
-                                    nextY = clamp(player.y - 1, 0, level.height - 1);
-                                    break;
-                                case !!gamepad.buttons[12].pressed:
-                                    console.log(12);
-                                    nextY = clamp(player.y + 1, 0, level.height - 1);
-                                    break;
-                                case !!gamepad.buttons[13].pressed:
-                                    console.log(13);
-                                    nextX = clamp(player.x - 1, 0, level.width - 1);
-                                    break;
-                                case !!gamepad.buttons[14].pressed:
-                                    console.log(14);
-                                    nextX = clamp(player.x + 1, 0, level.width - 1);
-                                    break;
-                                default:
-                                    f = false;
-                            }
-
-                            shouldMove = false;
-                            nextLevel = player.level;
-                            if ((layers[player.level].getTile(nextX, nextY) >= 0) && tileIsNotWall(player.level, level, nextX, nextY)) {
-                                shouldMove = true;
-                            } else if ((player.x != nextX) || (player.y != nextY)) {
-                                curLevel = 0;
-                                if (layers[player.level].getTile(nextX, nextY) >= 0)
-                                    curLevel = player.level;
-                                lastNonWallLevel = curLevel;
-                                lastTileWasNotWall = false;
-                                while (layers[curLevel + 1]) {
-                                    if (layers[curLevel + 1].getTile(nextX, nextY) >= 0) {
-                                        lastTileWasNotWall = tileIsNotWall(curLevel + 1, level, nextX, nextY) && sameType(player.level, player.x, player.y, curLevel + 1, nextX, nextY, layers);
-                                        if (lastTileWasNotWall) {
-                                            lastNonWallLevel = curLevel + 1;
-                                        }
-                                    }
-                                    if (lastTileWasNotWall) {
-                                        shouldMove = true;
-                                        nextLevel = lastNonWallLevel;
-                                    }
-                                    curLevel += 1;
-                                }
-                            }
-                            if (shouldMove) {
-                                if ((player.x != nextX) || (player.y != nextY) || (player.level != nextLevel)) {
-                                    playStep();
-                                }
-                                player.x = nextX;
-                                player.y = nextY;
-                                player.level = nextLevel;
-                            } else {
-                                playWall();
-                            }
-
-                            if (
-                                layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'exit')[0]
-                            ) {
-                                playExit();
-                                context.canvas.parentElement.removeChild(context.canvas);
-                                //hasFinished = true;
-                                if (gamepadInterval) {
-                                    clearInterval(gamepadInterval);
-                                }
-                                document.onkeydown = document.onkeyup = null;
-                                resolve();
-                            }
-
-                            if (
-                                layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'button')[0]
-                            ) {
-                                switch (levelFile) {
-                                    case 'res/maps/level2.json':
-                                        level.layers[4].visible = true;
-                                        console.log('push da button');
-                                        playButton();
-                                        break;
-                                }
-                            }
-                        }, 100);
-                    }
-
-                    if (gamepad) {
-                        initGamepad(gamepad);
-                    } else {
-                        window.addEventListener("gamepadconnected", function(e) {
-                              console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
-                                  e.gamepad.index, e.gamepad.id,
-                                      e.gamepad.buttons.length, e.gamepad.axes.length);
-
-                              initGamepad(e.gamepad);
-                        });
-                    }
+                    }, 100);
                 }
 
-                render();
-            });
-        });
+                if (gamepad) {
+                    initGamepad(gamepad);
+                } else {
+                    window.addEventListener("gamepadconnected", function(e) {
+                          console.log("Gamepad connected at index %d: %s. %d buttons, %d axes.",
+                              e.gamepad.index, e.gamepad.id,
+                                  e.gamepad.buttons.length, e.gamepad.axes.length);
+
+                          initGamepad(e.gamepad);
+                    });
+                }
+            }
+            render(context, level, layers, player);
+        };
+        
+        async function loadTileset(level) {
+            imgLoad(level.tilesets.map(function (tileset) {
+                return {
+                    graphics: [pathResolve(tileset.image, levelFile)],
+                    spritesheet: {
+                        width: level.tilewidth,
+                        height: level.tileheight
+                    }
+                };
+            }).concat({
+                graphics: ['res/player-top.png', 'res/player-base.png', 'res/player-left.png', 'res/player-right.png']
+            })).then(function (imgRes) { setupGame(level, imgRes); });
+        }
+
+        jsonLoad([levelFile]).then(function (res) { loadTileset(res[0]); } );
     });
 };
