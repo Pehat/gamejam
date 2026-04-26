@@ -55,6 +55,10 @@ function main() {
     window.toggleMenu = function() {
         var menu_toggle = document.querySelector("#menu");
         menu.classList.toggle('invisible');
+        var canvas = document.querySelector('#canvas');
+        if (canvas && menu.classList.contains('invisible')) {
+            canvas.focus();
+        }
     }
     
     var lvlCounter = document.querySelector('#lvlcounter');

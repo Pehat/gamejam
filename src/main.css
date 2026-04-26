@@ -8,6 +8,10 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
+canvas:focus {
+  outline: none;
+}
+
 .unselectable {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
