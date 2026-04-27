@@ -1,7 +1,12 @@
 import { bridge } from './bridge.js';
 import { clamp } from './util/clamp.js';
 import { pathResolve } from './util/pathResolve.js';
-import { registerKeyboardHandler, unregisterKeyboardHandler, registerGamepadHandler, registerActionsHandler, getCurrentInputState } from './input.js';
+import {
+  registerKeyboardHandler, unregisterKeyboardHandler,
+  registerGamepadHandler,
+  registerTouchHandler, unregisterTouchHandler,
+  registerActionsHandler, 
+  getCurrentInputState } from './input.js';
 const {
     jsonLoad,
     imgLoad,
@@ -169,6 +174,9 @@ export async function playLevel(levelFile, audio_sprites) {
 
             registerKeyboardHandler(canvas);
             registerGamepadHandler(canvas);
+
+            const ui_layer = document.querySelector('#ui-layer');
+            registerTouchHandler(ui_layer);
             registerActionsHandler((action) => {
                 var variation = null;
                 var curLevel = null;
@@ -270,6 +278,7 @@ export async function playLevel(levelFile, audio_sprites) {
                     }
                     // TODO: unbind all the input handlers
                     unregisterKeyboardHandler(canvas);
+                    unregisterTouchHandler(ui_layer);
                     resolve();
                 }
 

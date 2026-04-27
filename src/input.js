@@ -45,6 +45,23 @@ export function registerGamepadHandler(canvas) {
     // TODO: implement
 }
 
+function pointerDownListener(e) {
+    const key = e.target.getAttribute('data-key');
+    if (key) {
+        e.preventDefault();
+        const action = INPUT_MAP.keyboard[e.code];
+        if (action && actions_handler) actions_handler(action);
+    }
+}
+
+export function registerTouchHandler(ui_layer) {
+    ui_layer.addEventListener('pointerdown', pointerDownListener);
+}
+
+export function unregisterTouchHandler(ui_layer) {
+    ui_layer.removeEventListener('pointerdown', pointerDownListener);
+}
+
 export function registerActionsHandler(handler) { actions_handler = handler; }
 export function getCurrentInputState() { return input_state; }
 
