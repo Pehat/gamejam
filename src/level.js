@@ -177,6 +177,7 @@ export async function playLevel(levelFile, audio_sprites) {
 
             const ui_layer = document.querySelector('#ui-layer');
             registerTouchHandler(ui_layer);
+
             registerActionsHandler((action) => {
                 var variation = null;
                 var curLevel = null;
