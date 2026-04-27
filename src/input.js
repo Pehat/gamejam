@@ -49,7 +49,7 @@ function pointerDownListener(e) {
     const key = e.target.getAttribute('data-key');
     if (key) {
         e.preventDefault();
-        const action = INPUT_MAP.keyboard[e.code];
+        const action = INPUT_MAP.keyboard[key];
         if (action && actions_handler) actions_handler(action);
     }
 }
