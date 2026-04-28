@@ -105,11 +105,14 @@ input[type="checkbox"]:checked {
   z-index: 4;
   background: transparent;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: none;
 }
 
 @media (pointer: coarse) {
   #ui-layer { display: block; }
-  canvas { pointer-events: none; }
+  canvas { user-select: none; -webkit-user-select: none; touch-action: none; }
 }
 
 .d-pad, .action-buttons {
