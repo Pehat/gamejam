@@ -14,114 +14,107 @@ const {
 } = bridge;
 
 export async function playLevel(levelFile, audio_sprites) {
-    return new Promise(function (resolve) {
-        var gamepadInterval;
-        var hasFinished = false;
+    var gamepadInterval;
+    var hasFinished = false;
 
-        function playExit() {
-            console.log('exit');
-            hasFinished = true;
-            audio_sprites.play('done');
-        }
+    function playExit() {
+        console.log('exit');
+        hasFinished = true;
+        audio_sprites.play('done');
+    }
 
-        function playWall() {
-            audio_sprites.play('wall');
-        }
+    function playWall() {
+        audio_sprites.play('wall');
+    }
 
-        function playStep() {
-            audio_sprites.play('step');
-        }
+    function playStep() {
+        audio_sprites.play('step');
+    }
 
-        function playButton() {
-            audio_sprites.play('button');
-        }
+    function playButton() {
+        audio_sprites.play('button');
+    }
 
-        function getTilesByType(level, type) {
-            var tileProps = level.tilesets[0].tileproperties;
-            return Object.keys(tileProps).filter(function (tileId) {
-                return tileProps[tileId] && tileProps[tileId].type === type;
-            }).map(function (id) {
-                return parseInt(id, 10);
-            });
-        }
+    function getTilesByType(level, type) {
+        var tileProps = level.tilesets[0].tileproperties;
+        return Object.keys(tileProps).filter(function (tileId) {
+            return tileProps[tileId] && tileProps[tileId].type === type;
+        }).map(function (id) {
+            return parseInt(id, 10);
+        });
+    }
 
-        function tileIsNotWall(layerId, level, x, y) {
-            return getTilesByType(level, 'wall').indexOf(level.layers[layerId].data[y * level.width + x] - 1) === -1;
-        }
+    function tileIsNotWall(layerId, level, x, y) {
+        return getTilesByType(level, 'wall').indexOf(level.layers[layerId].data[y * level.width + x] - 1) === -1;
+    }
 
-        function tileIsNotNoXRay(layerId, level, x, y) {
-            return getTilesByType(level, 'noXRay').indexOf(level.layers[layerId].data[y * level.width + x] - 1) === -1;
-        }
+    function tileIsNotNoXRay(layerId, level, x, y) {
+        return getTilesByType(level, 'noXRay').indexOf(level.layers[layerId].data[y * level.width + x] - 1) === -1;
+    }
 
-        function sameType(layerId1, x1, y1, layerId2, x2, y2, layers) {
-            return layers[layerId1].getTile(x1, y1) === layers[layerId2].getTile(x2, y2);
-        }
+    function sameType(layerId1, x1, y1, layerId2, x2, y2, layers) {
+        return layers[layerId1].getTile(x1, y1) === layers[layerId2].getTile(x2, y2);
+    }
 
-        function setPlayerEntryCoords(player, level) {
-            var entranceTile = getTilesByType(level, 'entrance')[0];
+    function setPlayerEntryCoords(player, level) {
+        var entranceTile = getTilesByType(level, 'entrance')[0];
 
-            console.log(entranceTile);
+        console.log(entranceTile);
 
-            var entranceTileIdx = level.layers[0].data.indexOf(entranceTile + 1);
+        var entranceTileIdx = level.layers[0].data.indexOf(entranceTile + 1);
 
-            console.log(entranceTileIdx);
+        console.log(entranceTileIdx);
 
-            player.x = entranceTileIdx % level.width;
-            player.y = (entranceTileIdx / level.width) | 0;
-        }
+        player.x = entranceTileIdx % level.width;
+        player.y = (entranceTileIdx / level.width) | 0;
+    }
 
-        function render(context, level, layers, player) {
-            context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+    function render(context, level, layers, player) {
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
 
-            var playerLayer = layers[player.level];
-            layers.forEach(function (layer, i) {
-                if (i === player.level + 1) {
-                    var pc = layers[0].getTilePos(player.x, player.y);
-                    context.drawImage(player.imgs[0], pc.x, pc.y);
-                    context.drawImage(player.imgs[1], pc.x, pc.y - 16);
-                    context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
-                    context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
-                }
-                if (!level.layers[i].visible) {
-                    return;
-                }
-                for (var x = 0; x < level.width; ++x) {
-                    for (var y = 0; y < level.height; ++y) {
-                        if ((i > player.level) && playerLayer.getTile(x, y) >= 0) {// && layer.getTile(player.x, player.y) >= 0) {
-                            if (x === player.x && y === player.y) {
-                                context.globalAlpha = 0.3;
-                            } else if (Math.abs(x - player.x) + Math.abs(y - player.y) === 1) {
-                                context.globalAlpha = 0.5;
-                            } else if (Math.abs(x - player.x) === 1 && Math.abs(y - player.y) === 1) {
-                                context.globalAlpha = 0.7;
-                            }
-                        }
-                        //if ((x === player.x) && (y === player.y))
-                        //    layer.setLight(x, y);
-                        layer.draw(x, y);
-                        context.globalAlpha = 1;
-                    }
-                }
-
-                if (i <= player.level) {
-                    pc = layers[0].getTilePos(player.x, player.y);
-                    context.drawImage(player.imgs[0], pc.x, pc.y);
-                    context.drawImage(player.imgs[1], pc.x, pc.y - 16);
-                    context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
-                    context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
-                }
-            });
-
-            //pc = layers[0].getTilePos(player.x, player.y);
-            //context.drawImage(player.imgs[1], pc.x, pc.y - 16);
-            //context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
-            //context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
-
-            if (!hasFinished) {
-                requestAnimationFrame((ts) => { render(context, level, layers, player); });
+        var playerLayer = layers[player.level];
+        layers.forEach(function (layer, i) {
+            if (i === player.level + 1) {
+                var pc = layers[0].getTilePos(player.x, player.y);
+                context.drawImage(player.imgs[0], pc.x, pc.y);
+                context.drawImage(player.imgs[1], pc.x, pc.y - 16);
+                context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
+                context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
             }
-        }
+            if (!level.layers[i].visible) {
+                return;
+            }
+            for (var x = 0; x < level.width; ++x) {
+                for (var y = 0; y < level.height; ++y) {
+                    if ((i > player.level) && playerLayer.getTile(x, y) >= 0) {
+                        if (x === player.x && y === player.y) {
+                            context.globalAlpha = 0.3;
+                        } else if (Math.abs(x - player.x) + Math.abs(y - player.y) === 1) {
+                            context.globalAlpha = 0.5;
+                        } else if (Math.abs(x - player.x) === 1 && Math.abs(y - player.y) === 1) {
+                            context.globalAlpha = 0.7;
+                        }
+                    }
+                    layer.draw(x, y);
+                    context.globalAlpha = 1;
+                }
+            }
 
+            if (i <= player.level) {
+                pc = layers[0].getTilePos(player.x, player.y);
+                context.drawImage(player.imgs[0], pc.x, pc.y);
+                context.drawImage(player.imgs[1], pc.x, pc.y - 16);
+                context.drawImage(player.imgs[2], pc.x - 16, pc.y - 8);
+                context.drawImage(player.imgs[3], pc.x + 16, pc.y - 8);
+            }
+        });
+
+        if (!hasFinished) {
+            requestAnimationFrame((ts) => { render(context, level, layers, player); });
+        }
+    }
+
+    return new Promise(function (resolve) {
         async function setupGame(level, imgRes) {
             var canvas = document.querySelector('#canvas');
             canvas.tabIndex = 0;
@@ -140,18 +133,7 @@ export async function playLevel(levelFile, audio_sprites) {
                     tileHeight: level.tileheight,
                     width: layer.width,
                     height: layer.height,
-                    type: layer.type,
-                    //lightmap: [],
-                    //shadowDistance: {
-                    //    color: '0, 0, 33',
-                    //    distance: 1,
-                    //    darkness: 0.95
-                    //},
-                    //shadow: {
-                    //    offset: 0, // Offset is the same height as the stack tile
-                    //    verticalColor: '(5, 5, 30, 0.4)',
-                    //    horizontalColor: '(6, 5, 50, 0.5)'
-                    //}
+                    type: layer.type
                 });
 
                 l.flip("horizontal");
@@ -273,7 +255,6 @@ export async function playLevel(levelFile, audio_sprites) {
                     layers[player.level].getTile(player.x, player.y) === getTilesByType(level, 'exit')[0]
                 ) {
                     playExit();
-                    //hasFinished = true;
                     if (gamepadInterval) {
                         clearInterval(gamepadInterval);
                     }
